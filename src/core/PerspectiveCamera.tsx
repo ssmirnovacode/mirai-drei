@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import { Color, Group, Texture } from 'three'
 import * as React from 'react'
 import { PerspectiveCamera as PerspectiveCameraImpl } from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
@@ -13,13 +13,13 @@ type Props = Omit<JSX.IntrinsicElements['perspectiveCamera'], 'children'> & {
   /** Making it manual will stop responsiveness and you have to calculate aspect ratio yourself. */
   manual?: boolean
   /** The contents will either follow the camera, or be hidden when filming if you pass a function */
-  children?: React.ReactNode | ((texture: THREE.Texture) => React.ReactNode)
+  children?: React.ReactNode | ((texture: Texture) => React.ReactNode)
   /** Number of frames to render, Infinity */
   frames?: number
   /** Resolution of the FBO, 256 */
   resolution?: number
   /** Optional environment map for functional use */
-  envMap?: THREE.Texture
+  envMap?: Texture
 }
 // @keep
 export const PerspectiveCamera: ForwardRefComponent<Props, PerspectiveCameraImpl> = /* @__PURE__ */ React.forwardRef(
@@ -29,7 +29,7 @@ export const PerspectiveCamera: ForwardRefComponent<Props, PerspectiveCameraImpl
     const size = useThree(({ size }) => size)
     const cameraRef = React.useRef<PerspectiveCameraImpl>(null!)
     React.useImperativeHandle(ref, () => cameraRef.current, [])
-    const groupRef = React.useRef<THREE.Group>(null!)
+    const groupRef = React.useRef<Group>(null!)
     const fbo = useFBO(resolution)
 
     React.useLayoutEffect(() => {
@@ -43,7 +43,7 @@ export const PerspectiveCamera: ForwardRefComponent<Props, PerspectiveCameraImpl
     })
 
     let count = 0
-    let oldEnvMap: THREE.Color | THREE.Texture | null = null
+    let oldEnvMap: Color | Texture | null = null
     const functional = isFunction(children)
     useFrame((state) => {
       if (functional && (frames === Infinity || count < frames)) {
