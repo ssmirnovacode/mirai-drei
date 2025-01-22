@@ -1,12 +1,9 @@
-import * as THREE from 'three'
+import { BufferAttribute } from 'three'
 
 /**
  * Sets `BufferAttribute.updateRange` since r159.
  */
-export const setUpdateRange = (
-  attribute: THREE.BufferAttribute,
-  updateRange: { offset: number; count: number }
-): void => {
+export const setUpdateRange = (attribute: BufferAttribute, updateRange: { offset: number; count: number }): void => {
   if ('updateRanges' in attribute) {
     // r159
     // @ts-ignore
@@ -22,4 +19,5 @@ export const sRGBEncoding = 3001
 /**
  * TextureEncoding was deprecated in r152, and removed in r162.
  */
+// @keep
 export type TextureEncoding = typeof LinearEncoding | typeof sRGBEncoding

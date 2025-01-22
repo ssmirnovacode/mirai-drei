@@ -1,23 +1,17 @@
 import * as React from 'react'
-import * as THREE from 'three'
+import { DoubleSide, Group, MathUtils, Matrix4, Plane, Ray, Vector3 } from 'three'
 import { ThreeEvent, useThree } from '@react-three/fiber'
 import { Line } from '../../core/Line'
 import { Html } from '../Html'
 import { context } from './context'
 
-const clickDir = /* @__PURE__ */ new THREE.Vector3()
-const intersectionDir = /* @__PURE__ */ new THREE.Vector3()
+const clickDir = /* @__PURE__ */ new Vector3()
+const intersectionDir = /* @__PURE__ */ new Vector3()
 
 const toDegrees = (radians: number) => (radians * 180) / Math.PI
 const toRadians = (degrees: number) => (degrees * Math.PI) / 180
 
-const calculateAngle = (
-  clickPoint: THREE.Vector3,
-  intersectionPoint: THREE.Vector3,
-  origin: THREE.Vector3,
-  e1: THREE.Vector3,
-  e2: THREE.Vector3
-) => {
+const calculateAngle = (clickPoint: Vector3, intersectionPoint: Vector3, origin: Vector3, e1: Vector3, e2: Vector3) => {
   clickDir.copy(clickPoint).sub(origin)
   intersectionDir.copy(intersectionPoint).sub(origin)
   const dote1e1 = e1.dot(e1)
@@ -52,16 +46,12 @@ const minimizeAngle = (angle: number) => {
   return result
 }
 
-const rotMatrix = /* @__PURE__ */ new THREE.Matrix4()
-const posNew = /* @__PURE__ */ new THREE.Vector3()
-const ray = /* @__PURE__ */ new THREE.Ray()
-const intersection = /* @__PURE__ */ new THREE.Vector3()
-
-export const AxisRotator: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; axis: 0 | 1 | 2 }> = ({
-  dir1,
-  dir2,
-  axis,
-}) => {
+const rotMatrix = /* @__PURE__ */ new Matrix4()
+const posNew = /* @__PURE__ */ new Vector3()
+const ray = /* @__PURE__ */ new Ray()
+const intersection = /* @__PURE__ */ new Vector3()
+// @keep
+export const AxisRotator: React.FC<{ dir1: Vector3; dir2: Vector3; axis: 0 | 1 | 2 }> = ({ dir1, dir2, axis }) => {
   const {
     rotationLimits,
     annotations,
@@ -82,16 +72,16 @@ export const AxisRotator: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
   // @ts-expect-error new in @react-three/fiber@7.0.5
   const camControls = useThree((state) => state.controls) as { enabled: boolean }
   const divRef = React.useRef<HTMLDivElement>(null!)
-  const objRef = React.useRef<THREE.Group>(null!)
+  const objRef = React.useRef<Group>(null!)
   const angle0 = React.useRef<number>(0)
   const angle = React.useRef<number>(0)
   const clickInfo = React.useRef<{
-    clickPoint: THREE.Vector3
-    origin: THREE.Vector3
-    e1: THREE.Vector3
-    e2: THREE.Vector3
-    normal: THREE.Vector3
-    plane: THREE.Plane
+    clickPoint: Vector3
+    origin: Vector3
+    e1: Vector3
+    e2: Vector3
+    normal: Vector3
+    plane: Plane
   } | null>(null)
   const [isHovered, setIsHovered] = React.useState(false)
 
@@ -103,11 +93,11 @@ export const AxisRotator: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
       }
       e.stopPropagation()
       const clickPoint = e.point.clone()
-      const origin = new THREE.Vector3().setFromMatrixPosition(objRef.current.matrixWorld)
-      const e1 = new THREE.Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 0).normalize()
-      const e2 = new THREE.Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 1).normalize()
-      const normal = new THREE.Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 2).normalize()
-      const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(normal, origin)
+      const origin = new Vector3().setFromMatrixPosition(objRef.current.matrixWorld)
+      const e1 = new Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 0).normalize()
+      const e2 = new Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 1).normalize()
+      const normal = new Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 2).normalize()
+      const plane = new Plane().setFromNormalAndCoplanarPoint(normal, origin)
       clickInfo.current = { clickPoint, origin, e1, e2, normal, plane }
       onDragStart({ component: 'Rotator', axis, origin, directions: [e1, e2, normal] })
       camControls && (camControls.enabled = false)
@@ -141,7 +131,7 @@ export const AxisRotator: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
         if (min !== undefined && max !== undefined && max - min < 2 * Math.PI) {
           deltaAngle = minimizeAngle(deltaAngle)
           deltaAngle = deltaAngle > Math.PI ? deltaAngle - 2 * Math.PI : deltaAngle
-          deltaAngle = THREE.MathUtils.clamp(deltaAngle, min - angle0.current, max - angle0.current)
+          deltaAngle = MathUtils.clamp(deltaAngle, min - angle0.current, max - angle0.current)
           angle.current = angle0.current + deltaAngle
         } else {
           angle.current = minimizeAngle(angle0.current + deltaAngle)
@@ -185,17 +175,17 @@ export const AxisRotator: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
   const matrixL = React.useMemo(() => {
     const dir1N = dir1.clone().normalize()
     const dir2N = dir2.clone().normalize()
-    return new THREE.Matrix4().makeBasis(dir1N, dir2N, dir1N.clone().cross(dir2N))
+    return new Matrix4().makeBasis(dir1N, dir2N, dir1N.clone().cross(dir2N))
   }, [dir1, dir2])
 
   const r = fixed ? 0.65 : scale * 0.65
 
   const arc = React.useMemo(() => {
     const segments = 32
-    const points: THREE.Vector3[] = []
+    const points: Vector3[] = []
     for (let j = 0; j <= segments; j++) {
       const angle = (j * (Math.PI / 2)) / segments
-      points.push(new THREE.Vector3(Math.cos(angle) * r, Math.sin(angle) * r, 0))
+      points.push(new Vector3(Math.cos(angle) * r, Math.sin(angle) * r, 0))
     }
     return points
   }, [r])
@@ -235,7 +225,7 @@ export const AxisRotator: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
         depthTest={depthTest}
         points={arc}
         lineWidth={lineWidth}
-        side={THREE.DoubleSide}
+        side={DoubleSide}
         color={(isHovered ? hoveredColor : axisColors[axis]) as any}
         opacity={opacity}
         polygonOffset

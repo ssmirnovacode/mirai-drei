@@ -1,11 +1,11 @@
 import * as React from 'react'
-import * as THREE from 'three'
+import { DoubleSide, Group, Matrix4, Plane, Ray, Vector3 } from 'three'
 import { ThreeEvent, useThree } from '@react-three/fiber'
 import { Line } from '../../core/Line'
 import { Html } from '../../web/Html'
 import { context } from './context'
 
-const decomposeIntoBasis = (e1: THREE.Vector3, e2: THREE.Vector3, offset: THREE.Vector3) => {
+const decomposeIntoBasis = (e1: Vector3, e2: Vector3, offset: Vector3) => {
   const i1 =
     Math.abs(e1.x) >= Math.abs(e1.y) && Math.abs(e1.x) >= Math.abs(e1.z)
       ? 0
@@ -27,15 +27,11 @@ const decomposeIntoBasis = (e1: THREE.Vector3, e2: THREE.Vector3, offset: THREE.
   return [x, y]
 }
 
-const ray = /* @__PURE__ */ new THREE.Ray()
-const intersection = /* @__PURE__ */ new THREE.Vector3()
-const offsetMatrix = /* @__PURE__ */ new THREE.Matrix4()
-
-export const PlaneSlider: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; axis: 0 | 1 | 2 }> = ({
-  dir1,
-  dir2,
-  axis,
-}) => {
+const ray = /* @__PURE__ */ new Ray()
+const intersection = /* @__PURE__ */ new Vector3()
+const offsetMatrix = /* @__PURE__ */ new Matrix4()
+// @keep
+export const PlaneSlider: React.FC<{ dir1: Vector3; dir2: Vector3; axis: 0 | 1 | 2 }> = ({ dir1, dir2, axis }) => {
   const {
     translation,
     translationLimits,
@@ -57,12 +53,12 @@ export const PlaneSlider: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
   // @ts-expect-error new in @react-three/fiber@7.0.5
   const camControls = useThree((state) => state.controls) as { enabled: boolean }
   const divRef = React.useRef<HTMLDivElement>(null!)
-  const objRef = React.useRef<THREE.Group>(null!)
+  const objRef = React.useRef<Group>(null!)
   const clickInfo = React.useRef<{
-    clickPoint: THREE.Vector3
-    e1: THREE.Vector3
-    e2: THREE.Vector3
-    plane: THREE.Plane
+    clickPoint: Vector3
+    e1: Vector3
+    e2: Vector3
+    plane: Plane
   } | null>(null)
   const offsetX0 = React.useRef<number>(0)
   const offsetY0 = React.useRef<number>(0)
@@ -78,11 +74,11 @@ export const PlaneSlider: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
       }
       e.stopPropagation()
       const clickPoint = e.point.clone()
-      const origin = new THREE.Vector3().setFromMatrixPosition(objRef.current.matrixWorld)
-      const e1 = new THREE.Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 0).normalize()
-      const e2 = new THREE.Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 1).normalize()
-      const normal = new THREE.Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 2).normalize()
-      const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(normal, origin)
+      const origin = new Vector3().setFromMatrixPosition(objRef.current.matrixWorld)
+      const e1 = new Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 0).normalize()
+      const e2 = new Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 1).normalize()
+      const normal = new Vector3().setFromMatrixColumn(objRef.current.matrixWorld, 2).normalize()
+      const plane = new Plane().setFromNormalAndCoplanarPoint(normal, origin)
       clickInfo.current = { clickPoint, e1, e2, plane }
       offsetX0.current = translation.current[(axis + 1) % 3]
       offsetY0.current = translation.current[(axis + 2) % 3]
@@ -165,7 +161,7 @@ export const PlaneSlider: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
   const matrixL = React.useMemo(() => {
     const dir1N = dir1.clone().normalize()
     const dir2N = dir2.clone().normalize()
-    return new THREE.Matrix4().makeBasis(dir1N, dir2N, dir1N.clone().cross(dir2N))
+    return new Matrix4().makeBasis(dir1N, dir2N, dir1N.clone().cross(dir2N))
   }, [dir1, dir2])
 
   const pos1 = fixed ? 1 / 7 : scale / 7
@@ -174,11 +170,11 @@ export const PlaneSlider: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
 
   const points = React.useMemo(
     () => [
-      new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0, length, 0),
-      new THREE.Vector3(length, length, 0),
-      new THREE.Vector3(length, 0, 0),
-      new THREE.Vector3(0, 0, 0),
+      new Vector3(0, 0, 0),
+      new Vector3(0, length, 0),
+      new Vector3(length, length, 0),
+      new Vector3(length, 0, 0),
+      new Vector3(0, 0, 0),
     ],
     [length]
   )
@@ -218,7 +214,7 @@ export const PlaneSlider: React.FC<{ dir1: THREE.Vector3; dir2: THREE.Vector3; a
             color={color}
             polygonOffset
             polygonOffsetFactor={-10}
-            side={THREE.DoubleSide}
+            side={DoubleSide}
             fog={false}
           />
         </mesh>

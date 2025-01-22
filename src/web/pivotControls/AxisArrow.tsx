@@ -1,19 +1,14 @@
 import * as React from 'react'
-import * as THREE from 'three'
+import { DoubleSide, Group, Matrix4, Quaternion, Vector3 } from 'three'
 import { ThreeEvent, useThree } from '@react-three/fiber'
 import { Line } from '../../core/Line'
 import { Html } from '../Html'
 import { context } from './context'
 
-const vec1 = /* @__PURE__ */ new THREE.Vector3()
-const vec2 = /* @__PURE__ */ new THREE.Vector3()
+const vec1 = /* @__PURE__ */ new Vector3()
+const vec2 = /* @__PURE__ */ new Vector3()
 
-export const calculateOffset = (
-  clickPoint: THREE.Vector3,
-  normal: THREE.Vector3,
-  rayStart: THREE.Vector3,
-  rayDir: THREE.Vector3
-) => {
+export const calculateOffset = (clickPoint: Vector3, normal: Vector3, rayStart: Vector3, rayDir: Vector3) => {
   const e1 = normal.dot(normal)
   const e2 = normal.dot(clickPoint) - normal.dot(rayStart)
   const e3 = normal.dot(rayDir)
@@ -36,10 +31,10 @@ export const calculateOffset = (
   return offset
 }
 
-const upV = /* @__PURE__ */ new THREE.Vector3(0, 1, 0)
-const offsetMatrix = /* @__PURE__ */ new THREE.Matrix4()
-
-export const AxisArrow: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> = ({ direction, axis }) => {
+const upV = /* @__PURE__ */ new Vector3(0, 1, 0)
+const offsetMatrix = /* @__PURE__ */ new Matrix4()
+// @keep
+export const AxisArrow: React.FC<{ direction: Vector3; axis: 0 | 1 | 2 }> = ({ direction, axis }) => {
   const {
     translation,
     translationLimits,
@@ -61,8 +56,8 @@ export const AxisArrow: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> 
   // @ts-expect-error new in @react-three/fiber@7.0.5
   const camControls = useThree((state) => state.controls) as { enabled: boolean }
   const divRef = React.useRef<HTMLDivElement>(null!)
-  const objRef = React.useRef<THREE.Group>(null!)
-  const clickInfo = React.useRef<{ clickPoint: THREE.Vector3; dir: THREE.Vector3 } | null>(null)
+  const objRef = React.useRef<Group>(null!)
+  const clickInfo = React.useRef<{ clickPoint: Vector3; dir: Vector3 } | null>(null)
   const offset0 = React.useRef<number>(0)
   const [isHovered, setIsHovered] = React.useState(false)
 
@@ -73,9 +68,9 @@ export const AxisArrow: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> 
         divRef.current.style.display = 'block'
       }
       e.stopPropagation()
-      const rotation = new THREE.Matrix4().extractRotation(objRef.current.matrixWorld)
+      const rotation = new Matrix4().extractRotation(objRef.current.matrixWorld)
       const clickPoint = e.point.clone()
-      const origin = new THREE.Vector3().setFromMatrixPosition(objRef.current.matrixWorld)
+      const origin = new Vector3().setFromMatrixPosition(objRef.current.matrixWorld)
       const dir = direction.clone().applyMatrix4(rotation).normalize()
       clickInfo.current = { clickPoint, dir }
       offset0.current = translation.current[axis]
@@ -138,8 +133,8 @@ export const AxisArrow: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> 
     const coneWidth = fixed ? (lineWidth / scale) * 1.6 : scale / 20
     const coneLength = fixed ? 0.2 : scale / 5
     const cylinderLength = fixed ? 1 - coneLength : scale - coneLength
-    const quaternion = new THREE.Quaternion().setFromUnitVectors(upV, direction.clone().normalize())
-    const matrixL = new THREE.Matrix4().makeRotationFromQuaternion(quaternion)
+    const quaternion = new Quaternion().setFromUnitVectors(upV, direction.clone().normalize())
+    const matrixL = new Matrix4().makeRotationFromQuaternion(quaternion)
     return { cylinderLength, coneWidth, coneLength, matrixL }
   }, [direction, scale, lineWidth, fixed])
 
@@ -182,7 +177,7 @@ export const AxisArrow: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> 
           depthTest={depthTest}
           points={[0, 0, 0, 0, cylinderLength, 0] as any}
           lineWidth={lineWidth}
-          side={THREE.DoubleSide}
+          side={DoubleSide}
           color={color_ as any}
           opacity={opacity}
           polygonOffset

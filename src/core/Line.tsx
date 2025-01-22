@@ -21,7 +21,7 @@ export type LineProps = {
   Omit<ReactThreeFiber.Object3DNode<LineMaterial, [LineMaterialParameters]>, 'color' | 'vertexColors' | 'args'> & {
     color?: ColorRepresentation
   }
-
+// @keep
 export const Line: ForwardRefComponent<LineProps, Line2 | LineSegments2> = /* @__PURE__ */ React.forwardRef<
   Line2 | LineSegments2,
   LineProps

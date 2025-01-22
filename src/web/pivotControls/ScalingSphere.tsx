@@ -1,20 +1,15 @@
 import * as React from 'react'
-import * as THREE from 'three'
+import { Group, Matrix4, Mesh, Quaternion, Vector3 } from 'three'
 import { ThreeEvent, useThree } from '@react-three/fiber'
 
 import { Html } from '../../web/Html'
 import { context } from './context'
-import { calculateScaleFactor } from '../../core/calculateScaleFactor'
+import { calculateScaleFactor } from '../../core/calculateScaleFactor' // done
 
-const vec1 = /* @__PURE__ */ new THREE.Vector3()
-const vec2 = /* @__PURE__ */ new THREE.Vector3()
+const vec1 = /* @__PURE__ */ new Vector3()
+const vec2 = /* @__PURE__ */ new Vector3()
 
-export const calculateOffset = (
-  clickPoint: THREE.Vector3,
-  normal: THREE.Vector3,
-  rayStart: THREE.Vector3,
-  rayDir: THREE.Vector3
-) => {
+export const calculateOffset = (clickPoint: Vector3, normal: Vector3, rayStart: Vector3, rayDir: Vector3) => {
   const e1 = normal.dot(normal)
   const e2 = normal.dot(clickPoint) - normal.dot(rayStart)
   const e3 = normal.dot(rayDir)
@@ -37,11 +32,11 @@ export const calculateOffset = (
   return offset
 }
 
-const upV = /* @__PURE__ */ new THREE.Vector3(0, 1, 0)
-const scaleV = /* @__PURE__ */ new THREE.Vector3()
-const scaleMatrix = /* @__PURE__ */ new THREE.Matrix4()
-
-export const ScalingSphere: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2 }> = ({ direction, axis }) => {
+const upV = /* @__PURE__ */ new Vector3(0, 1, 0)
+const scaleV = /* @__PURE__ */ new Vector3()
+const scaleMatrix = /* @__PURE__ */ new Matrix4()
+// @keep
+export const ScalingSphere: React.FC<{ direction: Vector3; axis: 0 | 1 | 2 }> = ({ direction, axis }) => {
   const {
     scaleLimits,
     annotations,
@@ -63,15 +58,15 @@ export const ScalingSphere: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2
   // @ts-expect-error new in @react-three/fiber@7.0.5
   const camControls = useThree((state) => state.controls) as { enabled: boolean }
   const divRef = React.useRef<HTMLDivElement>(null!)
-  const objRef = React.useRef<THREE.Group>(null!)
-  const meshRef = React.useRef<THREE.Mesh>(null!)
+  const objRef = React.useRef<Group>(null!)
+  const meshRef = React.useRef<Mesh>(null!)
   const scale0 = React.useRef<number>(1)
   const scaleCur = React.useRef<number>(1)
   const clickInfo = React.useRef<{
-    clickPoint: THREE.Vector3
-    dir: THREE.Vector3
-    mPLG: THREE.Matrix4
-    mPLGInv: THREE.Matrix4
+    clickPoint: Vector3
+    dir: Vector3
+    mPLG: Matrix4
+    mPLGInv: Matrix4
     offsetMultiplier: number
   } | null>(null)
   const [isHovered, setIsHovered] = React.useState(false)
@@ -85,9 +80,9 @@ export const ScalingSphere: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2
         divRef.current.style.display = 'block'
       }
       e.stopPropagation()
-      const rotation = new THREE.Matrix4().extractRotation(objRef.current.matrixWorld)
+      const rotation = new Matrix4().extractRotation(objRef.current.matrixWorld)
       const clickPoint = e.point.clone()
-      const origin = new THREE.Vector3().setFromMatrixPosition(objRef.current.matrixWorld)
+      const origin = new Vector3().setFromMatrixPosition(objRef.current.matrixWorld)
       const dir = direction.clone().applyMatrix4(rotation).normalize()
       const mPLG = objRef.current.matrixWorld.clone()
       const mPLGInv = mPLG.clone().invert()
@@ -164,8 +159,8 @@ export const ScalingSphere: React.FC<{ direction: THREE.Vector3; axis: 0 | 1 | 2
 
   const { radius, matrixL } = React.useMemo(() => {
     const radius = fixed ? (lineWidth / scale) * 1.8 : scale / 22.5
-    const quaternion = new THREE.Quaternion().setFromUnitVectors(upV, direction.clone().normalize())
-    const matrixL = new THREE.Matrix4().makeRotationFromQuaternion(quaternion)
+    const quaternion = new Quaternion().setFromUnitVectors(upV, direction.clone().normalize())
+    const matrixL = new Matrix4().makeRotationFromQuaternion(quaternion)
     return { radius, matrixL }
   }, [direction, scale, lineWidth, fixed])
 

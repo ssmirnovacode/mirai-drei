@@ -1,43 +1,43 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import * as React from 'react'
-import * as THREE from 'three'
+import { Matrix4, Box3, Vector3, Group } from 'three'
 
 import { ForwardRefComponent } from '../../helpers/ts-utils'
-import { AxisArrow } from './AxisArrow'
-import { AxisRotator } from './AxisRotator'
-import { PlaneSlider } from './PlaneSlider'
-import { ScalingSphere } from './ScalingSphere'
-import { OnDragStartProps, context } from './context'
-import { calculateScaleFactor } from '../../core/calculateScaleFactor'
+import { AxisArrow } from './AxisArrow' // done
+import { AxisRotator } from './AxisRotator' // done
+import { PlaneSlider } from './PlaneSlider' // done
+import { ScalingSphere } from './ScalingSphere' // done
+import { OnDragStartProps, context } from './context' // done
+import { calculateScaleFactor } from '../../core/calculateScaleFactor' // done
 
-const mL0 = /* @__PURE__ */ new THREE.Matrix4()
-const mW0 = /* @__PURE__ */ new THREE.Matrix4()
-const mP = /* @__PURE__ */ new THREE.Matrix4()
-const mPInv = /* @__PURE__ */ new THREE.Matrix4()
-const mW = /* @__PURE__ */ new THREE.Matrix4()
-const mL = /* @__PURE__ */ new THREE.Matrix4()
-const mL0Inv = /* @__PURE__ */ new THREE.Matrix4()
-const mdL = /* @__PURE__ */ new THREE.Matrix4()
-const mG = /* @__PURE__ */ new THREE.Matrix4()
+const mL0 = /* @__PURE__ */ new Matrix4()
+const mW0 = /* @__PURE__ */ new Matrix4()
+const mP = /* @__PURE__ */ new Matrix4()
+const mPInv = /* @__PURE__ */ new Matrix4()
+const mW = /* @__PURE__ */ new Matrix4()
+const mL = /* @__PURE__ */ new Matrix4()
+const mL0Inv = /* @__PURE__ */ new Matrix4()
+const mdL = /* @__PURE__ */ new Matrix4()
+const mG = /* @__PURE__ */ new Matrix4()
 
-const bb = /* @__PURE__ */ new THREE.Box3()
-const bbObj = /* @__PURE__ */ new THREE.Box3()
-const vCenter = /* @__PURE__ */ new THREE.Vector3()
-const vSize = /* @__PURE__ */ new THREE.Vector3()
-const vAnchorOffset = /* @__PURE__ */ new THREE.Vector3()
-const vPosition = /* @__PURE__ */ new THREE.Vector3()
-const vScale = /* @__PURE__ */ new THREE.Vector3()
+const bb = /* @__PURE__ */ new Box3()
+const bbObj = /* @__PURE__ */ new Box3()
+const vCenter = /* @__PURE__ */ new Vector3()
+const vSize = /* @__PURE__ */ new Vector3()
+const vAnchorOffset = /* @__PURE__ */ new Vector3()
+const vPosition = /* @__PURE__ */ new Vector3()
+const vScale = /* @__PURE__ */ new Vector3()
 
-const xDir = /* @__PURE__ */ new THREE.Vector3(1, 0, 0)
-const yDir = /* @__PURE__ */ new THREE.Vector3(0, 1, 0)
-const zDir = /* @__PURE__ */ new THREE.Vector3(0, 0, 1)
+const xDir = /* @__PURE__ */ new Vector3(1, 0, 0)
+const yDir = /* @__PURE__ */ new Vector3(0, 1, 0)
+const zDir = /* @__PURE__ */ new Vector3(0, 0, 1)
 
 type PivotControlsProps = {
   /** Enables/disables the control, true */
   enabled?: boolean
   /** Scale of the gizmo, 1 */
   scale?: number
-  /** Width of the gizmo lines, this is a THREE.Line2 prop, 2.5 */
+  /** Width of the gizmo lines, this is a Line2 prop, 2.5 */
   lineWidth?: number
   /** If fixed is true is remains constant in size, scale is now in pixels, false */
   fixed?: boolean
@@ -47,7 +47,7 @@ type PivotControlsProps = {
   rotation?: [number, number, number]
 
   /** Starting matrix */
-  matrix?: THREE.Matrix4
+  matrix?: Matrix4
   /** BBAnchor, each axis can be between -1/0/+1 */
   anchor?: [number, number, number]
   /** If autoTransform is true, automatically apply the local transform on drag, true */
@@ -77,7 +77,7 @@ type PivotControlsProps = {
   /** Drag start event */
   onDragStart?: (props: OnDragStartProps) => void
   /** Drag event */
-  onDrag?: (l: THREE.Matrix4, deltaL: THREE.Matrix4, w: THREE.Matrix4, deltaW: THREE.Matrix4) => void
+  onDrag?: (l: Matrix4, deltaL: Matrix4, w: Matrix4, deltaW: Matrix4) => void
   /** Drag end event */
   onDragEnd?: () => void
   /** Set this to false if you want the gizmo to be visible through faces */
@@ -87,9 +87,9 @@ type PivotControlsProps = {
   userData?: { [key: string]: any }
   children?: React.ReactNode
 }
-
-export const PivotControls: ForwardRefComponent<PivotControlsProps, THREE.Group> = /* @__PURE__ */ React.forwardRef<
-  THREE.Group,
+// @keep
+export const PivotControls: ForwardRefComponent<PivotControlsProps, Group> = /* @__PURE__ */ React.forwardRef<
+  Group,
   PivotControlsProps
 >(
   (
@@ -128,13 +128,13 @@ export const PivotControls: ForwardRefComponent<PivotControlsProps, THREE.Group>
     fRef
   ) => {
     const invalidate = useThree((state) => state.invalidate)
-    const parentRef = React.useRef<THREE.Group>(null!)
-    const ref = React.useRef<THREE.Group>(null!)
-    const gizmoRef = React.useRef<THREE.Group>(null!)
-    const childrenRef = React.useRef<THREE.Group>(null!)
+    const parentRef = React.useRef<Group>(null!)
+    const ref = React.useRef<Group>(null!)
+    const gizmoRef = React.useRef<Group>(null!)
+    const childrenRef = React.useRef<Group>(null!)
     const translation = React.useRef<[number, number, number]>([0, 0, 0])
-    const cameraScale = React.useRef<THREE.Vector3>(new THREE.Vector3(1, 1, 1))
-    const gizmoScale = React.useRef<THREE.Vector3>(new THREE.Vector3(1, 1, 1))
+    const cameraScale = React.useRef<Vector3>(new Vector3(1, 1, 1))
+    const gizmoScale = React.useRef<Vector3>(new Vector3(1, 1, 1))
 
     React.useLayoutEffect(() => {
       if (!anchor) return
@@ -154,7 +154,7 @@ export const PivotControls: ForwardRefComponent<PivotControlsProps, THREE.Group>
       vSize.copy(bb.max).sub(bb.min).multiplyScalar(0.5)
       vAnchorOffset
         .copy(vSize)
-        .multiply(new THREE.Vector3(...anchor))
+        .multiply(new Vector3(...anchor))
         .add(vCenter)
       vPosition.set(...offset).add(vAnchorOffset)
       gizmoRef.current.position.copy(vPosition)
@@ -169,7 +169,7 @@ export const PivotControls: ForwardRefComponent<PivotControlsProps, THREE.Group>
           onDragStart && onDragStart(props)
           invalidate()
         },
-        onDrag: (mdW: THREE.Matrix4) => {
+        onDrag: (mdW: Matrix4) => {
           mP.copy(parentRef.current.matrixWorld)
           mPInv.copy(mP).invert()
           // After applying the delta
@@ -223,14 +223,14 @@ export const PivotControls: ForwardRefComponent<PivotControlsProps, THREE.Group>
       ]
     )
 
-    const vec = new THREE.Vector3()
+    const vec = new Vector3()
     useFrame((state) => {
       if (fixed) {
         const sf = calculateScaleFactor(gizmoRef.current.getWorldPosition(vec), scale, state.camera, state.size)
         cameraScale.current.setScalar(sf)
       }
 
-      if (matrix && matrix instanceof THREE.Matrix4) {
+      if (matrix && matrix instanceof Matrix4) {
         ref.current.matrix = matrix
       }
       // Update gizmo scale in accordance with matrix changes

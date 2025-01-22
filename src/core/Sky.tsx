@@ -25,7 +25,7 @@ export function calcPosFromAngles(inclination: number, azimuth: number, vector: 
 
   return vector
 }
-
+// @keep
 export const Sky: ForwardRefComponent<Props, SkyImpl> = /* @__PURE__ */ React.forwardRef(
   (
     {

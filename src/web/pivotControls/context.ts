@@ -1,16 +1,16 @@
-import * as THREE from 'three'
+import { Matrix4, Vector3 } from 'three'
 import * as React from 'react'
 
 export type OnDragStartProps = {
   component: 'Arrow' | 'Slider' | 'Rotator' | 'Sphere'
   axis: 0 | 1 | 2
-  origin: THREE.Vector3
-  directions: THREE.Vector3[]
+  origin: Vector3
+  directions: Vector3[]
 }
 
 export type PivotContext = {
   onDragStart: (props: OnDragStartProps) => void
-  onDrag: (mdW: THREE.Matrix4) => void
+  onDrag: (mdW: Matrix4) => void
   onDragEnd: () => void
   translation: { current: [number, number, number] }
   translationLimits?: [[number, number] | undefined, [number, number] | undefined, [number, number] | undefined]
@@ -27,5 +27,5 @@ export type PivotContext = {
   annotations?: boolean
   annotationsClass?: string
 }
-
+// @keep
 export const context = /* @__PURE__ */ React.createContext<PivotContext>(null!)

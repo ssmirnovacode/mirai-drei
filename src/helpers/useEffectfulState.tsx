@@ -6,7 +6,7 @@ function call<T>(ref: RefType<T> | undefined, value: T | null) {
   if (typeof ref === 'function') ref(value as T)
   else if (ref != null) ref.current = value as T
 }
-
+// @keep
 export function useEffectfulState<T>(fn: () => T, deps: React.DependencyList = [], cb?: RefType<T>) {
   const [state, set] = React.useState<T>()
   React.useLayoutEffect(() => {

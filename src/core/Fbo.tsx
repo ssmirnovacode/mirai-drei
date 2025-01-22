@@ -1,7 +1,17 @@
 import * as React from 'react'
-import * as THREE from 'three'
+import {
+  DepthTexture,
+  FloatType,
+  HalfFloatType,
+  LinearFilter,
+  MagnificationTextureFilter,
+  MinificationTextureFilter,
+  TextureDataType,
+  WebGLRenderTarget,
+  Wrapping,
+} from 'three'
 import { useThree } from '@react-three/fiber'
-import { TextureEncoding } from '../helpers/deprecated'
+import { TextureEncoding } from '../helpers/deprecated' // done
 
 // TODO: consume this from three >r154 when SemVer allows
 type ColorSpace = 'srgb' | 'srgb-linear' | '' | string
@@ -13,23 +23,24 @@ type FBOSettings = {
   depth?: boolean
 
   // WebGLRenderTargetOptions => RenderTargetOptions
-  wrapS?: THREE.Wrapping | undefined
-  wrapT?: THREE.Wrapping | undefined
-  magFilter?: THREE.MagnificationTextureFilter | undefined
-  minFilter?: THREE.MinificationTextureFilter | undefined
+  wrapS?: Wrapping | undefined
+  wrapT?: Wrapping | undefined
+  magFilter?: MagnificationTextureFilter | undefined
+  minFilter?: MinificationTextureFilter | undefined
   format?: number | undefined // RGBAFormat;
-  type?: THREE.TextureDataType | undefined // UnsignedByteType;
+  type?: TextureDataType | undefined // UnsignedByteType;
   anisotropy?: number | undefined // 1;
   depthBuffer?: boolean | undefined // true;
   stencilBuffer?: boolean | undefined // false;
   generateMipmaps?: boolean | undefined // true;
-  depthTexture?: THREE.DepthTexture | undefined
+  depthTexture?: DepthTexture | undefined
   encoding?: TextureEncoding | undefined
   colorSpace?: ColorSpace | undefined
 }
 
 // 👇 uncomment when TS version supports function overloads
 // export function useFBO(settings?: FBOSettings)
+// @keep
 export function useFBO(
   /** Width in pixels, or settings (will render fullscreen by default) */
   width?: number | FBOSettings,
@@ -37,7 +48,7 @@ export function useFBO(
   height?: number,
   /**Settings */
   settings?: FBOSettings
-): THREE.WebGLRenderTarget {
+): WebGLRenderTarget {
   const size = useThree((state) => state.size)
   const viewport = useThree((state) => state.viewport)
   const _width = typeof width === 'number' ? width : size.width * viewport.dpr
@@ -46,15 +57,15 @@ export function useFBO(
   const { samples = 0, depth, ...targetSettings } = _settings
 
   const target = React.useMemo(() => {
-    const target = new THREE.WebGLRenderTarget(_width, _height, {
-      minFilter: THREE.LinearFilter,
-      magFilter: THREE.LinearFilter,
-      type: THREE.HalfFloatType,
+    const target = new WebGLRenderTarget(_width, _height, {
+      minFilter: LinearFilter,
+      magFilter: LinearFilter,
+      type: HalfFloatType,
       ...targetSettings,
     })
 
     if (depth) {
-      target.depthTexture = new THREE.DepthTexture(_width, _height, THREE.FloatType)
+      target.depthTexture = new DepthTexture(_width, _height, FloatType)
     }
 
     target.samples = samples
